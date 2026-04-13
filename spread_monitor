@@ -1,0 +1,140 @@
+//@version=6
+indicator("Spread Monitor_SMA", overlay=false, max_labels_count=500)
+
+// === Общие настройки ===
+refreshTf = input.string("1", "Интервал обновления спреда", options=["1S", "5S", "10S", "30S", "1"])
+alertFreq = input.string("once_per_bar_close", "Частота alert()", options=["once_per_bar", "once_per_bar_close", "all"])
+alertFrequency = alertFreq == "once_per_bar" ? alert.freq_once_per_bar : alertFreq == "once_per_bar_close" ? alert.freq_once_per_bar_close : alert.freq_all
+
+// Функция расчета спреда в % (симметричный вариант)
+spreadPercent(a, b) =>
+    base = (a + b) / 2.0
+    base == 0.0 ? na : math.abs(a - b) / base * 100.0
+
+// Функция обработки пары
+processPair(enabled, pairName, symAraw, symBraw, threshold, tf) =>
+    symA = str.trim(symAraw)
+    symB = str.trim(symBraw)
+
+    hasA = str.length(symA) > 0
+    hasB = str.length(symB) > 0
+
+    // Используем input.string + ignore_invalid_symbol=true, чтобы не ломать весь индикатор при проблемном тикере.
+    closeA = enabled and hasA ? request.security(symA, tf, close, ignore_invalid_symbol=true) : na
+    closeB = enabled and hasB ? request.security(symB, tf, close, ignore_invalid_symbol=true) : na
+
+    symbolsValid = enabled and hasA and hasB and not na(closeA) and not na(closeB)
+    spr = symbolsValid ? spreadPercent(closeA, closeB) : na
+
+    isTriggered = symbolsValid and not na(spr) and spr >= threshold
+    isCrossUp = isTriggered and (na(spr[1]) or spr[1] < threshold)
+
+    if isCrossUp
+        alert(
+             "Спред выше порога: " + pairName +
+             " | " + symA + " vs " + symB +
+             " | Спред: " + str.tostring(spr, "#.##") + "%" +
+             " | Порог: " + str.tostring(threshold, "#.##") + "%" +
+             " | TF: " + tf,
+             alertFrequency
+         )
+
+    [spr, isTriggered, symbolsValid]
+
+// === Пара 1 ===
+enable1 = input.bool(true, "Включить пару 1")
+name1   = input.string("Пара 1", "Название пары 1")
+sym1A   = input.string("MEXC:RIVERUSDT", "Инструмент A1")
+sym1B   = input.string("BINANCE:BTCUSDT", "Инструмент B1")
+thr1    = input.float(2.0, "Порог спреда 1 (%)", minval=0.0, step=0.1)
+
+// === Пара 2 ===
+enable2 = input.bool(false, "Включить пару 2")
+name2   = input.string("Пара 2", "Название пары 2")
+sym2A   = input.string("NASDAQ:AAPL", "Инструмент A2")
+sym2B   = input.string("NASDAQ:MSFT", "Инструмент B2")
+thr2    = input.float(1.5, "Порог спреда 2 (%)", minval=0.0, step=0.1)
+
+// === Пара 3 ===
+enable3 = input.bool(false, "Включить пару 3")
+name3   = input.string("Пара 3", "Название пары 3")
+sym3A   = input.string("NYSE:KO", "Инструмент A3")
+sym3B   = input.string("NYSE:PEP", "Инструмент B3")
+thr3    = input.float(1.0, "Порог спреда 3 (%)", minval=0.0, step=0.1)
+
+// === Пара 4 ===
+enable4 = input.bool(false, "Включить пару 4")
+name4   = input.string("Пара 4", "Название пары 4")
+sym4A   = input.string("NASDAQ:NVDA", "Инструмент A4")
+sym4B   = input.string("NASDAQ:AMD", "Инструмент B4")
+thr4    = input.float(2.5, "Порог спреда 4 (%)", minval=0.0, step=0.1)
+
+// === Пара 5 ===
+enable5 = input.bool(false, "Включить пару 5")
+name5   = input.string("Пара 5", "Название пары 5")
+sym5A   = input.string("FX:EURUSD", "Инструмент A5")
+sym5B   = input.string("FX:GBPUSD", "Инструмент B5")
+thr5    = input.float(0.8, "Порог спреда 5 (%)", minval=0.0, step=0.1)
+
+// === Пара 6 ===
+enable6 = input.bool(false, "Включить пару 6")
+name6   = input.string("Пара 6", "Название пары 6")
+sym6A   = input.string("COMEX:GC1!", "Инструмент A6")
+sym6B   = input.string("COMEX:SI1!", "Инструмент B6")
+thr6    = input.float(2.0, "Порог спреда 6 (%)", minval=0.0, step=0.1)
+
+// === Пара 7 ===
+enable7 = input.bool(false, "Включить пару 7")
+name7   = input.string("Пара 7", "Название пары 7")
+sym7A   = input.string("BINANCE:BNBUSDT", "Инструмент A7")
+sym7B   = input.string("BINANCE:SOLUSDT", "Инструмент B7")
+thr7    = input.float(3.0, "Порог спреда 7 (%)", minval=0.0, step=0.1)
+
+// === Пара 8 ===
+enable8 = input.bool(false, "Включить пару 8")
+name8   = input.string("Пара 8", "Название пары 8")
+sym8A   = input.string("NYSE:XOM", "Инструмент A8")
+sym8B   = input.string("NYSE:CVX", "Инструмент B8")
+thr8    = input.float(1.2, "Порог спреда 8 (%)", minval=0.0, step=0.1)
+
+// === Пара 9 ===
+enable9 = input.bool(false, "Включить пару 9")
+name9   = input.string("Пара 9", "Название пары 9")
+sym9A   = input.string("NASDAQ:QQQ", "Инструмент A9")
+sym9B   = input.string("AMEX:SPY", "Инструмент B9")
+thr9    = input.float(0.7, "Порог спреда 9 (%)", minval=0.0, step=0.1)
+
+// === Пара 10 ===
+enable10 = input.bool(false, "Включить пару 10")
+name10   = input.string("Пара 10", "Название пары 10")
+sym10A   = input.string("TVC:USOIL", "Инструмент A10")
+sym10B   = input.string("TVC:UKOIL", "Инструмент B10")
+thr10    = input.float(1.0, "Порог спреда 10 (%)", minval=0.0, step=0.1)
+
+[spr1, trig1, valid1]    = processPair(enable1,  name1,  sym1A,  sym1B,  thr1, refreshTf)
+[spr2, trig2, valid2]    = processPair(enable2,  name2,  sym2A,  sym2B,  thr2, refreshTf)
+[spr3, trig3, valid3]    = processPair(enable3,  name3,  sym3A,  sym3B,  thr3, refreshTf)
+[spr4, trig4, valid4]    = processPair(enable4,  name4,  sym4A,  sym4B,  thr4, refreshTf)
+[spr5, trig5, valid5]    = processPair(enable5,  name5,  sym5A,  sym5B,  thr5, refreshTf)
+[spr6, trig6, valid6]    = processPair(enable6,  name6,  sym6A,  sym6B,  thr6, refreshTf)
+[spr7, trig7, valid7]    = processPair(enable7,  name7,  sym7A,  sym7B,  thr7, refreshTf)
+[spr8, trig8, valid8]    = processPair(enable8,  name8,  sym8A,  sym8B,  thr8, refreshTf)
+[spr9, trig9, valid9]    = processPair(enable9,  name9,  sym9A,  sym9B,  thr9, refreshTf)
+[spr10, trig10, valid10] = processPair(enable10, name10, sym10A, sym10B, thr10, refreshTf)
+
+hasInvalidEnabledPair = (enable1 and not valid1) or (enable2 and not valid2) or (enable3 and not valid3) or (enable4 and not valid4) or (enable5 and not valid5) or (enable6 and not valid6) or (enable7 and not valid7) or (enable8 and not valid8) or (enable9 and not valid9) or (enable10 and not valid10)
+alertcondition(hasInvalidEnabledPair, title="Невалидный тикер в паре", message="Одна или несколько включенных пар содержат недоступный тикер для вашего источника данных/тарифа.")
+
+anyTriggered = trig1 or trig2 or trig3 or trig4 or trig5 or trig6 or trig7 or trig8 or trig9 or trig10
+alertcondition(anyTriggered, title="Есть превышение спреда", message="По одной из настроенных пар спред превысил порог. Откройте индикатор для деталей.")
+
+plot(enable1  ? spr1  : na, title="Spread 1 (%)",  color=color.new(color.blue, 0))
+plot(enable2  ? spr2  : na, title="Spread 2 (%)",  color=color.new(color.orange, 0))
+plot(enable3  ? spr3  : na, title="Spread 3 (%)",  color=color.new(color.green, 0))
+plot(enable4  ? spr4  : na, title="Spread 4 (%)",  color=color.new(color.red, 0))
+plot(enable5  ? spr5  : na, title="Spread 5 (%)",  color=color.new(color.purple, 0))
+plot(enable6  ? spr6  : na, title="Spread 6 (%)",  color=color.new(color.teal, 0))
+plot(enable7  ? spr7  : na, title="Spread 7 (%)",  color=color.new(color.fuchsia, 0))
+plot(enable8  ? spr8  : na, title="Spread 8 (%)",  color=color.new(color.yellow, 0))
+plot(enable9  ? spr9  : na, title="Spread 9 (%)",  color=color.new(color.aqua, 0))
+plot(enable10 ? spr10 : na, title="Spread 10 (%)", color=color.new(color.gray, 0))
