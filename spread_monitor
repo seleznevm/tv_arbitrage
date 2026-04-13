@@ -128,20 +128,8 @@ alertcondition(hasInvalidEnabledPair, title="Невалидный тикер в 
 anyTriggered = trig1 or trig2 or trig3 or trig4 or trig5 or trig6 or trig7 or trig8 or trig9 or trig10
 alertcondition(anyTriggered, title="Есть превышение спреда", message="По одной из настроенных пар спред превысил порог. Откройте индикатор для деталей.")
 
-showZeroLevel = input.bool(true, "Показывать уровень нулевого спреда")
-
-var line zeroSpreadLine = na
-if showZeroLevel
-    if na(zeroSpreadLine)
-        zeroSpreadLine := line.new(bar_index, 0, bar_index + 1, 0, xloc=xloc.bar_index, extend=extend.both, color=color.new(color.white, 55), style=line.style_dotted, width=1)
-    else
-        line.set_xy1(zeroSpreadLine, bar_index, 0)
-        line.set_xy2(zeroSpreadLine, bar_index + 1, 0)
-        line.set_extend(zeroSpreadLine, extend.both)
-        line.set_color(zeroSpreadLine, color.new(color.white, 55))
-else if not na(zeroSpreadLine)
-    line.delete(zeroSpreadLine)
-    zeroSpreadLine := na
+showZeroLevel = input.bool(true, "Show zero spread level")
+plot(showZeroLevel ? 0 : na, title="Zero Spread Level (%)", color=color.new(color.white, 55), linewidth=1)
 
 plot(enable1  ? spr1  : na, title="Spread 1 (%)",  color=color.new(color.blue, 0))
 plot(enable2  ? spr2  : na, title="Spread 2 (%)",  color=color.new(color.orange, 0))
